@@ -1,0 +1,111 @@
+body {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: 13px;
+}
+
+h1,h2,h3,h4,h5,h6 {
+  font-weight: 300;
+}
+
+h2 {
+  margin-top: 0px;
+}
+
+a {
+  cursor: pointer;
+}
+
+.navbar .navbar-header {
+  float: left;
+}
+
+.navbar .navbar-brand {
+  font-weight: 300;
+}
+
+.navbar .navbar-text {
+  float: right;
+}
+
+.list-item {
+  padding: 6px 0px;
+  border-bottom: 1px solid #ccc;
+}
+
+.grid-item {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.grid-item img {
+  min-height: 142px;
+}
+
+.grid-item a.name {
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  font-size: 21px;
+}
+
+.grid-item p.viewers {
+  position: absolute;
+  top: 0px; left: 2px;
+  color: #fff;
+}
+
+.grid-item p.remove {
+  position: absolute;
+  top: 2px; right: 2px;
+  color: #fff;
+}
+
+.grid-item div.game {
+  position: absolute;
+  bottom: 0px;
+  width: 100%;
+  font-size: 13px;
+  margin: 0px;
+  padding: 2px;
+}
+
+.grid-item .online a.name,
+.grid-item .online div.game {
+  text-align: center;
+  text-shadow: 1px 1px 1px #333;
+  color: #eee;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.grid-item .online .offline {
+  display: none;
+}
+
+.grid-item .offline a.name {
+  position: static;
+}
+
+.grid-item .offline img,
+.grid-item .offline div.game,
+.grid-item .offline p.viewers {
+  display: none;
+}
+
+.row.distance {
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+.navbar {
+  border-radius: 0px;
+}
+
+.ad {
+  width: 100%;
+  min-height: 90px;
+  padding: 6px 0px;
+  margin: 12px 0px;
+  border-top: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+}

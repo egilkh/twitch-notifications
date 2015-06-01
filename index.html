@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html ng-app="TN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
+
+  <title>Twitch Notifications</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,300" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  <link href="app.css" rel="stylesheet">
+
+  <!-- META/SEO -->
+  <meta name="description" content="Get notified when your favorite streamer(s) come online.">
+  <meta name="keywords" content="twitch,stream,channel,notify,notification,online">
+
+  <meta property="og:url" content="https://six83.com/twitch-notifications/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Twitch Notifications">
+  <meta property="og:description" content="Get notified when your favorite streamer(s) come online.">
+</head>
+<body ng-controller="TNCtrl" ng-cloak>
+
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#"><i class="fa fa-cube"></i> Twitch Notifications</a>
+      </div>
+
+      <p class="navbar-text navbar-right">
+        <a href="https://github.com/egilkh/twitch-notifications" title="A litte more information about all this.">
+          <span class="glyphicon glyphicon-info-sign"></span>
+          <span class="sr-only">Information</span>
+        </a>
+      </p
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <h1 class="sr-only">Twitch Notifications</h1>
+
+        <p>Get notified when your favorite streamer(s) come online.</p>
+        <p>Last updated at {{ LastUpdated | date:'shortTime' }}.</p>
+
+        <div ng-show="showMore">
+          <p>Auto-update is set to check every 2 minutes. Please don't spam Twitch :)</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <h2 class="pull-left">Channels</h2>
+
+        <div class="btn-group pull-right">
+          <button type="button" class="btn btn-default" ng-class="{ active: Options.View === 'Grid' }" ng-click="Options.View = 'Grid'">
+            <span class="glyphicon glyphicon-th"></span> <span class="sr-only">Grid</span>
+          </button>
+          <button type="button" class="btn btn-default" ng-class="{ active: Options.View === 'List' }" ng-click="Options.View = 'List'">
+            <span class="glyphicon glyphicon-th-list"></span> <span class="sr-only">List</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" ng-if="Channels.length && Options.View === 'List'">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <div class="row list-item" ng-repeat="Channel in Channels | filter:filterOnline | orderBy:['-online', 'name']">
+          <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
+            <span class="pull-left">
+              <a ng-click="RemoveChannel(Channel.name)"><span class="glyphicon glyphicon-remove"></span></a>
+              <a ng-href="http://www.twitch.tv/{{ Channel.name }}" target="_blank">{{ Channel.displayName || Channel.name }}</a>
+            </span>
+            <span class="visible-xs pull-right" ng-show="!Channel.online">Offline</span>
+          </div>
+          <div class="col-xs-8 col-sm-4 col-md-4 col-lg-4">
+            <span ng-show="Channel.online">playing <em>{{ Statuses[Channel.name].stream.game }}</em></span>
+            <span class="hidden-xs" ng-show="!Channel.online">Offline</span>
+          </div>
+          <div class="col-xs-4 col-sm-4 col-md-4 col-lg-4" ng-show="Channel.online">
+            <span class="pull-right">
+              {{ Statuses[Channel.name].stream.viewers }}
+            </span>
+          </div>
+          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            {{ Statuses[Channel.name].stream.channel.status }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" ng-if="Channels.length && Options.View === 'Grid'">
+      <div class="col-xs-12 col-sm-6 col-md-4 col-lg-4" ng-repeat="Channel in Channels | filter:filterOnline | orderBy:['-online', 'name']">
+        <div class="grid-item">
+          <div ng-class="{ online: Channel.online, offline: !Channel.online }">
+            <a ng-href="http://www.twitch.tv/{{ Channel.name }}" target="_blank" title="{{ Statuses[Channel.name].stream.channel.status }}">
+              <img class="img-responsive" ng-src="{{ Statuses[Channel.name].stream.preview.large }}?buster={{ LastUpdated }}" ng-if="Channel.online">
+            </a>
+            <a class="name" ng-href="http://www.twitch.tv/{{ Channel.name }}" target="_blank">
+              {{ Channel.displayName || Channel.name }}
+              <span class="offline">(offline)</span>
+            </a>
+            <p class="viewers">{{ Statuses[Channel.name].stream.viewers }}</p>
+            <p class="remove"><a ng-click="RemoveChannel(Channel.name)"><span class="glyphicon glyphicon-remove"></span></a></p>
+            <div class="game">
+              <p class="status">
+                {{ Statuses[Channel.name].stream.channel.status }}
+              </p>
+              <p class="game">
+                {{ Statuses[Channel.name].stream.game }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row" ng-if="!Channels.length">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <p>No channels yet, go ahead and add one?</p>
+      </div>
+    </div>
+
+    <div class="row distance">
+      <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+        <h2>Add channel</h2>
+        <form novalidate name="AddChannelForm" ng-submit="AddChannel(AddChannelName);">
+          <div class="input-group form-group">
+            <input type="text" class="form-control" required ng-model="AddChannelName" placeholder="ChannelName">
+            <span class="input-group-btn">
+              <button class="btn btn-success" type="submit" ng-disabled="!AddChannelForm.$valid">Add!</button>
+            </span>
+          </div>
+        </form>
+        <p>Add a new channel to watch. Might take a minute before you see them as online.</p>
+      </div>
+      <div class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+        <h2>Import channels</h2>
+        <form novalidate name="ImportChannelsForm" ng-submit="ImportChannels(ImportChannelsName);">
+          <div class="input-group form-group">
+            <input type="text" class="form-control" required ng-model="ImportChannelsName" placeholder="TwitchUser">
+            <span class="input-group-btn">
+              <button class="btn btn-success" type="submit" ng-disabled="!ImportChannelsForm.$valid || ImportChannelsWorking">Import!</button>
+            </span>
+          </div>
+        </form>
+        <p>This will import all the channels a user is following. Please note it only gets the first 100 at the moment.</p>
+      </div>
+    </div>
+
+    <div class="row distance">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <h2>Share</h2>
+        <!-- -->
+        <p>
+          Use this
+          <a ng-href="https://six83.com/twitch-notifications/#/?l={{ SteamLinkList }}">link here to share your list</a>
+          of channels with your friends.
+        </p>
+        <p>
+          Tell your friends about Twitch Notifications!
+        </p>
+        <p>
+          <a href="https://twitter.com/share" class="twitter-share-button" data-url="https://six83.com/twitch-notifications/" data-count="none">Tweet</a><script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+          <div class="fb-share-button" data-href="https://six83.com/twitch-notifications/" data-layout="icon_link"></div>
+          <div id="fb-root"></div>
+          <script>(function(d, s, id) {
+           var js, fjs = d.getElementsByTagName(s)[0];
+           if (d.getElementById(id)) return;
+           js = d.createElement(s); js.id = id;
+           js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.0";
+           fjs.parentNode.insertBefore(js, fjs);
+          }(document, 'script', 'facebook-jssdk'));</script>
+        </p>
+      </div>
+    </div>
+
+    <div class="row distance">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <h2>Settings</h2>
+      </div>
+      <div class="col-xs-12 col-sm-4 col-md-4 col-lg-46">
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" ng-model="Options.Notification" ng-change="notificationChange()"> Show a notification
+          </label>
+          <p><small>Show a notification when someone comes online. Requires desktop notifications.</small></p>
+        </div>
+      </div>
+      <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" ng-model="Options.OnlyShowOnline"> Only show online
+          </label>
+          <p><small>Show only channels that are online.</small></p>
+        </div>
+      </div>
+      <div class="col-xs-12 col-sm-4 col-md-4 col-lg-4">
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" ng-model="Options.Sound"> Play a sound
+          </label>
+          <p><small>Play a sound when a channel comes online.</small></p>
+          <audio id="audioPlayer">
+            <source src="178646_2580450-lq.mp3" type="audio/mpeg">
+            Your browser does not support the audio element.
+          </audio>
+        </div>
+      </div>
+    </div>
+
+    <div class="row distance">
+      <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+        <h2>About</h2>
+        <p>
+          This is a weekend project by egilkh.
+        </p>
+        <p>
+          Uses the open Twitch API to get status and channel information. Thanks Twitch :)
+        </p>
+        <p>
+          Any comments can be sent to <a href="mailto:egilkh@gmail.com">egilkh@gmail.com</a>.
+        </p>
+        <p>
+          This is not affiliated with Twitch in any way.
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="libs.js"></script>
+  <script src="app.js"></script>
+
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-56469448-1', 'auto');
+    ga('require', 'displayfeatures');
+    ga('send', 'pageview');
+  </script>
+</body>
+</html>
